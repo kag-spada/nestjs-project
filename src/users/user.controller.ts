@@ -5,6 +5,7 @@ import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { RolesGuard } from '../../guards/roles.guard';
 import { Roles } from './decorators/roles.decorator';
 import { CreateUserDto } from './dto/createUser.dto';
+import { LoginUserDto } from './dto/login.dto';
 
 @Controller('users')
 export class UserController {
@@ -13,6 +14,21 @@ export class UserController {
   @Post('/register')
   async createUser(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.userService.createUser(createUserDto);
+  }
+
+  @Post('login')
+  async loginUser(@Body() loginUserDto: LoginUserDto): Promise<{ accessToken: string }> {
+    return this.userService.loginUser(loginUserDto);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() body: { email: string }): Promise<string> {
+    try {
+      await this.userService.initiatePasswordReset(body.email);
+      return 'Reset password email sent successfully! Please check your email for further instructions.';
+    } catch (error) {
+      return 'Invalid email address. Please provide a valid email associated with your account.';
+    }
   }
 
   @Post('verify-email/:verificationToken')
@@ -27,20 +43,6 @@ export class UserController {
     }
   }
 
-  @Post('login')
-  async loginUser(@Body() user: User): Promise<{ accessToken: string }> {
-    return this.userService.loginUser(user.email, user.password);
-  }
-
-  @Post('forgot-password')
-  async forgotPassword(@Body() body: { email: string }): Promise<string> {
-    try {
-      await this.userService.initiatePasswordReset(body.email);
-      return 'Reset password email sent successfully! Please check your email for further instructions.';
-    } catch (error) {
-      return 'Invalid email address. Please provide a valid email associated with your account.';
-    }
-  }
   @Post('reset-password/:resetToken')
   async resetPassword(
     @Param('resetToken') resetToken: string,

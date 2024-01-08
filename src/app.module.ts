@@ -13,7 +13,7 @@ import { User } from './users/entity/user.entity';
       port: parseInt(process.env.DB_PORT, 10),
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
-      database: 'postgres',
+      database: process.env.DB_NAME,
       entities: [User],
       synchronize: true,
     }),

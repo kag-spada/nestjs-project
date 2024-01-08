@@ -14,7 +14,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from './dto/createUser.dto';
 import { v4 as uuid } from 'uuid';
-import { ConfigService } from '@nestjs/config';
+import { LoginUserDto } from './dto/login.dto';
 
 @Injectable()
 export class UserService {
@@ -49,29 +49,11 @@ export class UserService {
     }
   }
 
-  async verifyEmail(verificationToken: string): Promise<void> {
-    try {
-      const user = await this.userRepository.findOne({
-        where: { verificationToken },
-      });
-
-      if (!user) {
-        throw new NotFoundException('Invalid verification token');
-      }
-
-      user.verificationToken = null;
-      user.isLoggedIn = true;
-      await this.userRepository.save(user);
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to verify email');
-    }
-  }
-
   async loginUser(
-    email: string,
-    password: string,
+    loginUserDto: LoginUserDto,
   ): Promise<{ accessToken: string }> {
     try {
+      const { email, password } = loginUserDto;
       const user = await this.userRepository.findOne({ where: { email } });
 
       if (!user) {
@@ -95,7 +77,28 @@ export class UserService {
 
       return { accessToken };
     } catch (error) {
-      throw new InternalServerErrorException('Failed to login user');
+      console.log(error);
+      throw new InternalServerErrorException(
+        error.message || 'Failed to login user',
+      );
+    }
+  }
+
+  async verifyEmail(verificationToken: string): Promise<void> {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { verificationToken },
+      });
+
+      if (!user) {
+        throw new NotFoundException('Invalid verification token');
+      }
+
+      user.verificationToken = null;
+      user.isLoggedIn = true;
+      await this.userRepository.save(user);
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to verify email');
     }
   }
 
