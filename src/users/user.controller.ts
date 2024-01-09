@@ -6,6 +6,7 @@ import { RolesGuard } from '../../guards/roles.guard';
 import { Roles } from './decorators/roles.decorator';
 import { CreateUserDto } from './dto/createUser.dto';
 import { LoginUserDto } from './dto/login.dto';
+import { LinkedInUserInfo } from 'src/utils/types';
 
 @Controller('users')
 export class UserController {
@@ -22,7 +23,7 @@ export class UserController {
   }
 
   @Get('linkedin')
-  async linkedIn(@Query('code') code: string ): Promise<{ access_token: string }> {
+  async linkedIn(@Query('code') code: string ): Promise<{ user: LinkedInUserInfo }> {
     return await this.userService.getLinkedInDetails(code)
   }
 
@@ -68,6 +69,3 @@ export class UserController {
     return this.userService.getAllUsers();
   }
 }
-
-
-//

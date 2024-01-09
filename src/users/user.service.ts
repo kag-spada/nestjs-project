@@ -16,6 +16,7 @@ import { CreateUserDto } from './dto/createUser.dto';
 import { v4 as uuid } from 'uuid';
 import { LoginUserDto } from './dto/login.dto';
 import AxiosInstance, { Axios } from 'src/utils/axiosInstance';
+import { LinkedInUserInfo } from 'src/utils/types';
 
 @Injectable()
 export class UserService {
@@ -167,7 +168,7 @@ export class UserService {
     }
   }
 
-  async getLinkedInDetails(code: string): Promise<{ access_token: string }> {
+  async getLinkedInDetails(code: string): Promise<{ user: LinkedInUserInfo }> {
     try {
       const dataObj = {
         grant_type: 'authorization_code',
@@ -176,34 +177,27 @@ export class UserService {
         client_secret: process.env.CLIENT_SECRET,
         redirect_uri: process.env.REDIRECT_URL,
       };
-      console.log(dataObj,'dataxsx')
 
-      let url = `https://www.linkedin.com/uas/oauth2/accessToken?client_id=${process.env.CLIENT_ID}&client_secret=${process.env.CLIENT_SECRET}&grant_type=authorization_code&redirect_uri=${process.env.REDIRECT_URL}&code=${code}`
-
-      // const {
-      //   data: accessData
-      // } = await AxiosInstance.post('/oauth/v2/accessToken', dataObj, {
-      //   headers: {
-      //     'Content-Type': 'application/x-www-form-urlencoded',
-      //   },
-      // });
-      const {
-        data: accessData
-      } = await AxiosInstance.get(url);
-      console.log(accessData,'access')
-      const { data } = await Axios.get(
-        'https://api.linkedin.com/v2/userinfo',
+      const { data: accessData } = await AxiosInstance.post(
+        '/oauth/v2/accessToken',
+        dataObj,
         {
           headers: {
-            'Content-Type': 'text/plain',
-            Authorization: `Bearer ${accessData?.access_token}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
           },
         },
       );
-      console.log(data);
-      return {access_token:''};
+
+      const { data } = await Axios.get('https://api.linkedin.com/v2/userinfo', {
+        headers: {
+          'Content-Type': 'text/plain',
+          Authorization: `Bearer ${accessData?.access_token}`,
+        },
+      });
+
+      return { user: data };
     } catch (error) {
-      console.log(error,'err')
+      console.log(error, 'err');
       throw new InternalServerErrorException('Failed to fetch users');
     }
   }
