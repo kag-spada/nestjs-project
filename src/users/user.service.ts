@@ -15,6 +15,7 @@ import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from './dto/createUser.dto';
 import { v4 as uuid } from 'uuid';
 import { LoginUserDto } from './dto/login.dto';
+import AxiosInstance, { Axios } from 'src/utils/axiosInstance';
 
 @Injectable()
 export class UserService {
@@ -163,6 +164,47 @@ export class UserService {
         'Failed to fetch user',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    }
+  }
+
+  async getLinkedInDetails(code: string): Promise<{ access_token: string }> {
+    try {
+      const dataObj = {
+        grant_type: 'authorization_code',
+        code,
+        client_id: process.env.CLIENT_ID,
+        client_secret: process.env.CLIENT_SECRET,
+        redirect_uri: process.env.REDIRECT_URL,
+      };
+      console.log(dataObj,'dataxsx')
+
+      let url = `https://www.linkedin.com/uas/oauth2/accessToken?client_id=${process.env.CLIENT_ID}&client_secret=${process.env.CLIENT_SECRET}&grant_type=authorization_code&redirect_uri=${process.env.REDIRECT_URL}&code=${code}`
+
+      // const {
+      //   data: accessData
+      // } = await AxiosInstance.post('/oauth/v2/accessToken', dataObj, {
+      //   headers: {
+      //     'Content-Type': 'application/x-www-form-urlencoded',
+      //   },
+      // });
+      const {
+        data: accessData
+      } = await AxiosInstance.get(url);
+      console.log(accessData,'access')
+      const { data } = await Axios.get(
+        'https://api.linkedin.com/v2/userinfo',
+        {
+          headers: {
+            'Content-Type': 'text/plain',
+            Authorization: `Bearer ${accessData?.access_token}`,
+          },
+        },
+      );
+      console.log(data);
+      return {access_token:''};
+    } catch (error) {
+      console.log(error,'err')
+      throw new InternalServerErrorException('Failed to fetch users');
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, UseGuards, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './entity/user.entity';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
@@ -19,6 +19,11 @@ export class UserController {
   @Post('login')
   async loginUser(@Body() loginUserDto: LoginUserDto): Promise<{ accessToken: string }> {
     return this.userService.loginUser(loginUserDto);
+  }
+
+  @Get('linkedin')
+  async linkedIn(@Query('code') code: string ): Promise<{ access_token: string }> {
+    return await this.userService.getLinkedInDetails(code)
   }
 
   @Post('forgot-password')
@@ -63,3 +68,6 @@ export class UserController {
     return this.userService.getAllUsers();
   }
 }
+
+
+//
