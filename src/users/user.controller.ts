@@ -1,4 +1,12 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Param,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './entity/user.entity';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
@@ -6,7 +14,7 @@ import { RolesGuard } from '../../guards/roles.guard';
 import { Roles } from './decorators/roles.decorator';
 import { CreateUserDto } from './dto/createUser.dto';
 import { LoginUserDto } from './dto/login.dto';
-import { LinkedInUserInfo } from 'src/utils/types';
+import { LinkedInUserInfo, LinkedInSearchData } from 'src/utils/types';
 
 @Controller('users')
 export class UserController {
@@ -18,13 +26,35 @@ export class UserController {
   }
 
   @Post('login')
-  async loginUser(@Body() loginUserDto: LoginUserDto): Promise<{ accessToken: string }> {
+  async loginUser(
+    @Body() loginUserDto: LoginUserDto,
+  ): Promise<{ accessToken: string }> {
     return this.userService.loginUser(loginUserDto);
   }
 
   @Get('linkedin')
-  async linkedIn(@Query('code') code: string ): Promise<{ user: LinkedInUserInfo }> {
-    return await this.userService.getLinkedInDetails(code)
+  async linkedIn(
+    @Query('code') code: string,
+  ): Promise<{ user: LinkedInUserInfo }> {
+    return await this.userService.getLinkedInDetails(code);
+  }
+
+  @Post('scrap')
+  async scrap(
+    @Body() body: { url: string; access_token: string; pages: number },
+  ): Promise<{ data: LinkedInSearchData[] | []}> {
+    return await this.userService.scrapLinkedinUrl(
+      body.url,
+      body.pages,
+      body.access_token,
+    );
+  }
+
+  @Get('search')
+  async linkedinSearch(
+    @Query('code') code: string,
+  ): Promise<{ user: LinkedInUserInfo }> {
+    return await this.userService.getLinkedInDetails(code);
   }
 
   @Post('forgot-password')

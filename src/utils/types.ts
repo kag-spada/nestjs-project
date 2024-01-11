@@ -11,3 +11,7 @@ export interface LinkedInUserInfo {
   email: string;
   picture: string;
 }
+
+export interface LinkedInSearchData {
+  name: string
+}

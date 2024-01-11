@@ -16,7 +16,9 @@ import { CreateUserDto } from './dto/createUser.dto';
 import { v4 as uuid } from 'uuid';
 import { LoginUserDto } from './dto/login.dto';
 import AxiosInstance, { Axios } from 'src/utils/axiosInstance';
-import { LinkedInUserInfo } from 'src/utils/types';
+import { scrapData } from 'src/utils/linkedinScrapper';
+import { LinkedInSearchData, LinkedInUserInfo } from 'src/utils/types';
+import { access } from 'fs';
 
 @Injectable()
 export class UserService {
@@ -196,6 +198,22 @@ export class UserService {
       });
 
       return { user: data };
+    } catch (error) {
+      console.log(error, 'err');
+      throw new InternalServerErrorException('Failed to fetch users');
+    }
+  }
+
+  async scrapLinkedinUrl(
+    url: string,
+    pages: number,
+    access_token: string,
+  ): Promise<{ data: LinkedInSearchData[] | [] }> {
+    try {
+      const data = await scrapData(url, pages, access_token);
+      if (data?.length > 0) {
+        return { data };
+      }
     } catch (error) {
       console.log(error, 'err');
       throw new InternalServerErrorException('Failed to fetch users');
