@@ -170,7 +170,7 @@ export class UserService {
     }
   }
 
-  async getLinkedInDetails(code: string): Promise<{ user: LinkedInUserInfo }> {
+  async getLinkedInDetails(code: string): Promise<{ url: string }> {
     try {
       const dataObj = {
         grant_type: 'authorization_code',
@@ -190,14 +190,19 @@ export class UserService {
         },
       );
 
-      const { data } = await Axios.get('https://api.linkedin.com/v2/userinfo', {
-        headers: {
-          'Content-Type': 'text/plain',
-          Authorization: `Bearer ${accessData?.access_token}`,
-        },
-      });
+      // const { data } = await Axios.get('https://api.linkedin.com/v2/userinfo', {
+      //   headers: {
+      //     'Content-Type': 'text/plain',
+      //     Authorization: `Bearer ${accessData?.access_token}`,
+      //   },
+      // });
 
-      return { user: data };
+      // return { user: data };
+      return { url: `http://localhost:5173/redirect/${accessData?.access_token}` };
+
+      // http://localhost:3000/users/linkedin?code=AQQW7iIoXruxcl1vfi2mH4txYwmfS_hnUiMdUChCk0rwcLtUNMjyGKVeNI6huToF737agHIoDtL9MiqkCtrXV-hp0Xc9AVZ8y7d-WDdxVzecBCqYkM-RvdY-j-Ln_IbvdQotRC5XFpjmS0gL_z0mYxqimcpi-ZJxsilagrq5D94ZQVGtX27zmhpJnSqC01ULAtdWPy-qpYw16jGP-KM&state=foobar
+
+
     } catch (error) {
       console.log(error, 'err');
       throw new InternalServerErrorException('Failed to fetch users');

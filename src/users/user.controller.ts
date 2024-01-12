@@ -6,6 +6,7 @@ import {
   Param,
   UseGuards,
   Query,
+  Redirect,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './entity/user.entity';
@@ -33,9 +34,10 @@ export class UserController {
   }
 
   @Get('linkedin')
+  @Redirect('')
   async linkedIn(
     @Query('code') code: string,
-  ): Promise<{ user: LinkedInUserInfo }> {
+  ): Promise<{ url: string }> {
     return await this.userService.getLinkedInDetails(code);
   }
 
@@ -48,13 +50,6 @@ export class UserController {
       body.pages,
       body.access_token,
     );
-  }
-
-  @Get('search')
-  async linkedinSearch(
-    @Query('code') code: string,
-  ): Promise<{ user: LinkedInUserInfo }> {
-    return await this.userService.getLinkedInDetails(code);
   }
 
   @Post('forgot-password')
